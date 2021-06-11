@@ -20,7 +20,6 @@
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-redis": "*",
-        "ext-swoole": ">=4.5",
         "psr/container": "^1.0",
         "psr/event-dispatcher": "^1.0",
         "psr/http-message": "^1.0",
@@ -42,7 +41,7 @@
         "google/protobuf": "^3.6.1",
         "grpc/grpc": "^1.15",
         "guzzlehttp/guzzle": "^6.3|^7.0",
-        "hyperf/engine": "dev-master",
+        "hyperf/engine-swow": "dev-master",
         "influxdb/influxdb-php": "^1.15.0",
         "ircmaxell/random-lib": "^1.2",
         "jcchavezs/zipkin-opentracing": "^1.0",
@@ -405,11 +404,11 @@
     },
     "bin": [],
     "scripts": {
-        "test": "./bin/co-phpunit --colors=always",
-        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
-        "license-check": "docheader check src/ test/",
-        "cs-fix": "php-cs-fixer fix $1",
-        "json-fix": "./bin/composer-json-fixer",
-        "analyse": "phpstan analyse --memory-limit 4096M -l 5 -c phpstan.neon"
+        "test": "@php bin/co-phpunit --colors=always",
+        "test-coverage": "@php vendor/bin/phpunit --colors=always --coverage-clover clover.xml",
+        "license-check": "@php vendor/bin/docheader check src/ test/",
+        "cs-fix": "@php vendor/bin/php-cs-fixer fix $1",
+        "json-fix": "@php bin/composer-json-fixer",
+        "analyse": "@php vendor/bin/phpstan analyse --memory-limit 4096M -l 5 -c phpstan.neon"
     }
 }
