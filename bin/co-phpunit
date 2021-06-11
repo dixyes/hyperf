@@ -34,11 +34,20 @@ if (isset($options['prepend'])) {
 unset($options);
 require PHPUNIT_COMPOSER_INSTALL;
 $code = 0;
-Swoole\Coroutine::set(['hook_flags' => SWOOLE_HOOK_ALL, 'exit_condition' => function () {
-    return Swoole\Coroutine::stats()['coroutine_num'] === 0;
-}]);
-Swoole\Coroutine\run(function () use(&$code) {
-    $code = PHPUnit\TextUI\Command::main(false);
-    Swoole\Timer::clearAll();
-});
+if (extension_loaded("swoole")) {
+    Swoole\Coroutine::set(['hook_flags' => SWOOLE_HOOK_ALL, 'exit_condition' => function () {
+        return Swoole\Coroutine::stats()['coroutine_num'] === 0;
+    }]);
+    Swoole\Coroutine\run(function () use(&$code) {
+        $code = PHPUnit\TextUI\Command::main(false);
+        Swoole\Timer::clearAll();
+    });
+} else if (extension_loaded("swow")) {
+    \Swow\Coroutine::run(function () use(&$code) {
+        $code = PHPUnit\TextUI\Command::main(false);
+    });
+} else {
+    die("Swoole or Swow is not enabled");
+}
+
 die($code);
