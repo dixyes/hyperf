@@ -14,8 +14,7 @@ namespace HyperfTest\Utils;
 use Hyperf\Utils\Coroutine;
 use HyperfTest\Utils\Exception\RetryException;
 use PHPUnit\Framework\TestCase;
-use Swoole\Coroutine\Channel;
-use Swoole\Runtime;
+use Hyperf\Engine\Channel;
 
 /**
  * @internal
@@ -117,7 +116,13 @@ class FunctionTest extends TestCase
 
     public function testSwooleHookFlags()
     {
-        $this->assertSame(SWOOLE_HOOK_ALL, swoole_hook_flags());
+        if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+            $this->assertSame(SWOOLE_HOOK_ALL, swoole_hook_flags());
+        } else {
+            $this->markTestSkipped(
+                'Swoole only.'
+            );
+        }
     }
 
     /**
@@ -125,17 +130,23 @@ class FunctionTest extends TestCase
      */
     public function testRun()
     {
-        $asserts = [
-            SWOOLE_HOOK_ALL,
-            SWOOLE_HOOK_SLEEP,
-            SWOOLE_HOOK_CURL,
-        ];
+        if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+            $asserts = [
+                SWOOLE_HOOK_ALL,
+                SWOOLE_HOOK_SLEEP,
+                SWOOLE_HOOK_CURL,
+            ];
 
-        foreach ($asserts as $flags) {
-            run(function () use ($flags) {
-                $this->assertTrue(Coroutine::inCoroutine());
-                $this->assertSame($flags, Runtime::getHookFlags());
-            }, $flags);
+            foreach ($asserts as $flags) {
+                run(function () use ($flags) {
+                    $this->assertTrue(Coroutine::inCoroutine());
+                    $this->assertSame($flags, Runtime::getHookFlags());
+                }, $flags);
+            }
+        } else {
+            $this->markTestSkipped(
+                'Swoole only.'
+            );
         }
     }
 

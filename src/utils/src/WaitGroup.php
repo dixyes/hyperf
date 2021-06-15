@@ -11,8 +11,17 @@ declare(strict_types=1);
  */
 namespace Hyperf\Utils;
 
-use Swoole\Coroutine\WaitGroup as SwooleWaitGroup;
-
-class WaitGroup extends SwooleWaitGroup
-{
+// maybe this should be in engine?
+if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+    class WaitGroup extends \Swoole\Coroutine\WaitGroup
+    {
+    }
+} else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+    class WaitGroup extends \Swow\Sync\WaitGroup
+    {
+    }
+} else {
+    // TODO: warning
 }
+
+

@@ -19,6 +19,7 @@ use Hyperf\Utils\Optional;
 use Hyperf\Utils\Parallel;
 use Hyperf\Utils\Str;
 use Hyperf\Utils\Waiter;
+use Hyperf\Engine\Constant;
 
 if (! function_exists('value')) {
     /**
@@ -423,33 +424,59 @@ if (! function_exists('make')) {
 }
 
 if (! function_exists('run')) {
-    /**
-     * Run callable in non-coroutine environment, all hook functions by Swoole only available in the callable.
-     *
-     * @param array|callable $callbacks
-     */
-    function run($callbacks, int $flags = SWOOLE_HOOK_ALL): bool
-    {
-        if (Coroutine::inCoroutine()) {
-            throw new RuntimeException('Function \'run\' only execute in non-coroutine environment.');
+    if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+        /**
+         * Run callable in non-coroutine environment, all hook functions by Swoole only available in the callable.
+         *
+         * @param array|callable $callbacks
+         */
+        function run($callbacks, int $flags = SWOOLE_HOOK_ALL): bool
+        {
+            if (Coroutine::inCoroutine()) {
+                throw new RuntimeException('Function \'run\' only execute in non-coroutine environment.');
+            }
+
+            \Swoole\Runtime::enableCoroutine($flags);
+
+            $result = \Swoole\Coroutine\Run(...(array) $callbacks);
+
+            \Swoole\Runtime::enableCoroutine(false);
+            return $result;
         }
-
-        \Swoole\Runtime::enableCoroutine($flags);
-
-        $result = \Swoole\Coroutine\Run(...(array) $callbacks);
-
-        \Swoole\Runtime::enableCoroutine(false);
-        return $result;
+    } else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+        /**
+         * Run callable in new coroutine.
+         *
+         * @param array|callable $callbacks
+         */
+        function run($callbacks, int $flags = 0): \Swow\Coroutine
+        {
+            return \Swow\Coroutine::run(...(array) $callbacks);
+        }
+    } else {
+        // TODO: warning
     }
 }
 
 if (! function_exists('swoole_hook_flags')) {
-    /**
-     * Return the default swoole hook flags, you can rewrite it by defining `SWOOLE_HOOK_FLAGS`.
-     */
-    function swoole_hook_flags(): int
-    {
-        return defined('SWOOLE_HOOK_FLAGS') ? SWOOLE_HOOK_FLAGS : SWOOLE_HOOK_ALL;
+    if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+        /**
+         * Return the default swoole hook flags, you can rewrite it by defining `SWOOLE_HOOK_FLAGS`.
+         */
+        function swoole_hook_flags(): int
+        {
+            return defined('SWOOLE_HOOK_FLAGS') ? SWOOLE_HOOK_FLAGS : SWOOLE_HOOK_ALL;
+        }
+    } else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+        /**
+         * Return 0x7fffffff (mock only).
+         */
+        function swoole_hook_flags(): int
+        {
+            return 0x7fffffff;
+        }
+    } else {
+        // TODO: warning
     }
 }
 

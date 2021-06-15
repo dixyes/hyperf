@@ -13,7 +13,6 @@ namespace Hyperf\Utils\Coroutine;
 
 use Hyperf\Utils\Coroutine;
 use Hyperf\Utils\Traits\Container;
-use Swoole\Coroutine as SwooleCoroutine;
 
 class Locker
 {
@@ -36,22 +35,40 @@ class Locker
 
     public static function lock($key): bool
     {
-        if (! self::has($key)) {
-            self::add($key, 0);
-            return true;
+        if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+            if (! self::has($key)) {
+                self::add($key, 0);
+                return true;
+            }
+            self::add($key, Coroutine::id());
+        } else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+            if (! self::has($key)) {
+                self::add($key, null);
+                return true;
+            }
+            self::add($key, \Swow\Coroutine::getCurrent());
+        } else {
+            // TODO: warning
         }
-        self::add($key, Coroutine::id());
-        SwooleCoroutine::suspend();
+        \Hyperf\Engine\Coroutine::yield();
         return false;
     }
 
     public static function unlock($key): void
     {
         if (self::has($key)) {
-            $ids = self::get($key);
-            foreach ($ids as $id) {
-                if ($id > 0) {
-                    SwooleCoroutine::resume($id);
+            $handles = self::get($key);
+            foreach ($handles as $handle) {
+                if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+                    if ($handle > 0) {
+                        \Swoole\Coroutine::resume($handle);
+                    }
+                } else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+                    if ($handle !== null) {
+                        $handle->resume();
+                    }
+                } else {
+                    // TODO: warning
                 }
             }
             self::clear($key);

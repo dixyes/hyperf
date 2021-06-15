@@ -12,8 +12,8 @@ declare(strict_types=1);
 namespace HyperfTest\Utils;
 
 use Hyperf\Utils\WaitGroup;
+use Hyperf\Engine\Coroutine;
 use PHPUnit\Framework\TestCase;
-use Swoole\Coroutine;
 
 /**
  * @internal

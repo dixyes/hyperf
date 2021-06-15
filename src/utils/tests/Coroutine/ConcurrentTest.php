@@ -13,10 +13,10 @@ namespace HyperfTest\Utils\Coroutine;
 
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Coroutine\Concurrent;
+use Hyperf\Engine\Coroutine;
 use Mockery;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Swoole\Coroutine;
 
 /**
  * @internal

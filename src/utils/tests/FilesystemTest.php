@@ -12,9 +12,8 @@ declare(strict_types=1);
 namespace HyperfTest\Utils;
 
 use Hyperf\Utils\Parallel;
+use Hyperf\Engine\Channel;
 use PHPUnit\Framework\TestCase;
-use Swoole\Coroutine\Channel;
-use Swoole\Runtime;
 
 /**
  * @internal
@@ -24,7 +23,13 @@ class FilesystemTest extends TestCase
 {
     public function testLock()
     {
-        Runtime::enableCoroutine(SWOOLE_HOOK_ALL);
+        if (\Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+            \Swoole\Runtime::enableCoroutine(SWOOLE_HOOK_ALL);
+        } else if (\Hyperf\Engine\Constant::ENGINE === 'Swow') {
+            // do nothing
+        } else {
+            // TODO: warning
+        }
         file_put_contents('./test.txt', str_repeat('a', 10000));
         $p = new Parallel();
         for ($i = 0; $i < 100; ++$i) {
