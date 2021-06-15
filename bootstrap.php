@@ -14,9 +14,12 @@ use Hyperf\Di\Aop\AstVisitorRegistry;
 use Hyperf\Di\Aop\PropertyHandlerVisitor;
 use Hyperf\Di\Aop\ProxyCallVisitor;
 use Hyperf\Di\Aop\RegisterInjectPropertyHandler;
+use Hyperf\Engine\Constant;
 
 ! defined('BASE_PATH') && define('BASE_PATH', __DIR__);
-! defined('SWOOLE_HOOK_FLAGS') && define('SWOOLE_HOOK_FLAGS', SWOOLE_HOOK_ALL);
+if (Hyperf\Engine\Constant::ENGINE === 'Swoole') {
+    ! defined('SWOOLE_HOOK_FLAGS') && define('SWOOLE_HOOK_FLAGS', SWOOLE_HOOK_ALL);
+}
 
 require_once BASE_PATH . '/vendor/autoload.php';
 
